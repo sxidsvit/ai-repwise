@@ -50,7 +50,7 @@ Repwise is a modern serverless SaaS platform built for personal trainers and the
 | **Chat & Video Calls**  | **Stream (`@stream-io/node-sdk`, `@stream-io/video-react-sdk`)** | WebRTC 1-on-1 video calls & WebSocket messaging               |
 | **Payments**            | **Stripe**                                                       | Payment processing, customer billing, and marketplace splits  |
 | **Monitoring & AI Fix** | **Sentry + Seer**                                                | Tracing, session replays, and automated PR bug fixes          |
-| **Hosting & CI/CD**     | **Cloudways Velocity**                                           | Managed Node.js deployment automated from GitHub              |
+| **Hosting & CI/CD**     | **Cloudways Velocity/Vercel**                                    | Managed Node.js deployment automated from GitHub              |
 | **AI Development**      | **Claude Code / Cursor**                                         | Autonomous coding agent driven by Claude 3.5 / 3.7 Sonnet     |
 | **MCP Protocols**       | **Chrome, Sentry, Higsfield MCP**                                | Direct browser control, issue tracking, and asset generation  |
 
@@ -183,19 +183,33 @@ Access the raw assets and technical documents in the repository:
 
 ---
 
-## 🌐 Deployment
+## 🌐 Deployment Options
 
-### Cloudways Velocity / Automated CI/CD
+### Option 1: Vercel (Recommended for Next.js)
 
-1. Connect your repository branch (`master` / `main`) to **Cloudways Velocity**.
-2. Configure all environment variables in the Cloudways dashboard.
-3. Push to `master`. Cloudways will trigger automated builds and rollouts.
+**Yes, Vercel can be used seamlessly without any issues.** The architecture of Repwise is ideally suited for the Vercel platform for the following reasons:
+
+1. **Video Streaming & Uploads:** Video lessons **do not pass through** Vercel's serverless functions. Uploads and HLS video streaming are processed directly through the **ImageKit** CDN. The Vercel server only issues short-lived authorization tokens.
+2. **Chat & WebRTC Video Calls:** Video streaming and WebSocket messaging run directly between the user's browser and **Stream (GetStream.io)** infrastructure. Vercel does not maintain persistent WebSocket connections or route heavy media traffic.
+
+#### Vercel Limits to Keep in Mind:
+
+- **Serverless Function Timeout:** Execution time for serverless functions is limited (10–60s on Hobby, up to 300s on Pro). This is not an issue for Repwise, as API routes only handle token generation and fast SQL queries to Neon Postgres.
+- **Request Body Size Limit:** The payload limit for Serverless API calls is 4.5 MB. However, since media uploads are sent client-side directly to ImageKit (using the `IKUpload` client SDK), video files never exceed this limit.
+
+### Option 2: Cloudways Velocity / Custom Node.js Server
+
+If you prefer deploying a long-running Node.js process on a dedicated VPS or host like Cloudways or Railway:
+
+1. Connect your repository branch (`master` / `main`).
+2. Configure all environment variables in your deployment dashboard.
+3. Build and start command: `npm run build && npm run start`.
 
 ---
 
 #### 🙏 Acknowledgements
 
-This project is a version of the original project [Outpost](https://www.youtube.com/watch?v=-QCBtAfPHo0).
+This project is a version of the [original project](https://www.youtube.com/watch?v=-QCBtAfPHo0).
 
 A heartfelt thank you to [Codesistency](https://www.youtube.com/@codesistency) for his invaluable contributions.
 
